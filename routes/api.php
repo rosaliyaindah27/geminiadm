@@ -61,28 +61,33 @@ Route::get('/docs', function () {
     ]);
 });
 
-// Signal API Routes
-Route::prefix('signals')->group(function () {
-    Route::get('/', [SignalApiController::class, 'index']);
-    Route::get('/latest', [SignalApiController::class, 'latest']);
-    Route::get('/stats', [SignalApiController::class, 'stats']);
-    Route::get('/performance', [SignalApiController::class, 'performance']);
-    Route::get('/{id}', [SignalApiController::class, 'show']);
-    Route::post('/', [SignalApiController::class, 'create']);
-    Route::put('/{id}', [SignalApiController::class, 'update']);
-});
+// API v1 routes with authentication
+Route::prefix('v1')->middleware(['api.key', 'api.rate'])->group(function () {
+    
+    // Signal API Routes
+    Route::prefix('signals')->group(function () {
+        Route::get('/', [SignalApiController::class, 'index']);
+        Route::get('/latest', [SignalApiController::class, 'latest']);
+        Route::get('/stats', [SignalApiController::class, 'stats']);
+        Route::get('/performance', [SignalApiController::class, 'performance']);
+        Route::get('/{id}', [SignalApiController::class, 'show']);
+        Route::post('/', [SignalApiController::class, 'create']);
+        Route::put('/{id}', [SignalApiController::class, 'update']);
+    });
 
-// User API Routes
-Route::prefix('user')->group(function () {
-    Route::get('/profile', [UserApiController::class, 'profile']);
-    Route::put('/profile', [UserApiController::class, 'updateProfile']);
-    Route::get('/subscription', [UserApiController::class, 'subscription']);
-    Route::get('/notifications', [UserApiController::class, 'notifications']);
-    Route::post('/notifications/{id}/read', [UserApiController::class, 'markNotificationAsRead']);
-    Route::post('/notifications/read-all', [UserApiController::class, 'markAllNotificationsAsRead']);
-    Route::get('/api-usage', [UserApiController::class, 'apiUsage']);
-    Route::post('/regenerate-api-key', [UserApiController::class, 'regenerateApiKey']);
-    Route::post('/toggle-api-access', [UserApiController::class, 'toggleApiAccess']);
+    // User API Routes
+    Route::prefix('user')->group(function () {
+        Route::get('/profile', [UserApiController::class, 'profile']);
+        Route::put('/profile', [UserApiController::class, 'updateProfile']);
+        Route::get('/subscription', [UserApiController::class, 'subscription']);
+        Route::get('/notifications', [UserApiController::class, 'notifications']);
+        Route::post('/notifications/{id}/read', [UserApiController::class, 'markNotificationAsRead']);
+        Route::post('/notifications/read-all', [UserApiController::class, 'markAllNotificationsAsRead']);
+        Route::get('/api-usage', [UserApiController::class, 'apiUsage']);
+        Route::post('/regenerate-api-key', [UserApiController::class, 'regenerateApiKey']);
+        Route::post('/toggle-api-access', [UserApiController::class, 'toggleApiAccess']);
+    });
+    
 });
 
 // Webhook endpoints for external integrations

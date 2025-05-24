@@ -220,7 +220,7 @@ class AdminSystemTest extends TestCase
         $this->assertStringContainsString($user->name, $welcomeView->render());
 
         $subscriptionView = view('emails.subscription-activated', compact('user'));
-        $this->assertStringContainsString('subscription has been activated', $subscriptionView->render());
+        $this->assertStringContainsString('subscription has been successfully activated', $subscriptionView->render());
     }
 
     /** @test */

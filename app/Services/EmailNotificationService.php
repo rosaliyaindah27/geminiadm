@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Models\UserNotification;
+use App\Mail\WelcomeEmail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
@@ -12,10 +13,7 @@ class EmailNotificationService
     public function sendWelcomeEmail(User $user)
     {
         try {
-            Mail::send('emails.welcome', ['user' => $user], function ($message) use ($user) {
-                $message->to($user->email, $user->name)
-                        ->subject('Welcome to Gemini Pro Trader!');
-            });
+            Mail::to($user->email)->send(new WelcomeEmail($user));
 
             $this->logNotification($user, 'welcome_email', 'Welcome email sent successfully');
             

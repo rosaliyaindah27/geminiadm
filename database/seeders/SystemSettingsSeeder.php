@@ -260,6 +260,11 @@ class SystemSettingsSeeder extends Seeder
         ];
 
         foreach ($settings as $setting) {
+            // Convert array values to JSON strings
+            if (is_array($setting['value'])) {
+                $setting['value'] = json_encode($setting['value']);
+            }
+            
             SystemSetting::updateOrCreate(
                 ['key' => $setting['key']],
                 $setting

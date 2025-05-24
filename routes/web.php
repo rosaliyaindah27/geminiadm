@@ -129,8 +129,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::prefix('notifications')->name('notifications.')->group(function () {
         Route::get('/', [NotificationManagementController::class, 'index'])->name('index');
         Route::get('/templates', [NotificationManagementController::class, 'templates'])->name('templates');
+        Route::get('/templates/create', [NotificationManagementController::class, 'createTemplate'])->name('templates.create');
+        Route::post('/templates', [NotificationManagementController::class, 'storeTemplate'])->name('templates.store');
         Route::get('/templates/{template}/edit', [NotificationManagementController::class, 'editTemplate'])->name('templates.edit');
         Route::put('/templates/{template}', [NotificationManagementController::class, 'updateTemplate'])->name('templates.update');
+        Route::delete('/templates/{template}', [NotificationManagementController::class, 'deleteTemplate'])->name('templates.delete');
         Route::get('/send', [NotificationManagementController::class, 'send'])->name('send');
         Route::post('/send', [NotificationManagementController::class, 'sendNotification'])->name('send.store');
         Route::get('/history', [NotificationManagementController::class, 'history'])->name('history');
