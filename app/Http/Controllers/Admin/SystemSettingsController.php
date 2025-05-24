@@ -214,38 +214,77 @@ class SystemSettingsController extends Controller
 
     public function clearCache(Request $request)
     {
-        $type = $request->get('type', 'all');
+        try {
+            $type = $request->get('type', 'all');
 
-        switch ($type) {
-            case 'config':
-                Artisan::call('config:clear');
-                $message = 'Configuration cache cleared.';
-                break;
-            case 'route':
-                Artisan::call('route:clear');
-                $message = 'Route cache cleared.';
-                break;
-            case 'view':
-                Artisan::call('view:clear');
-                $message = 'View cache cleared.';
-                break;
-            case 'application':
-                Artisan::call('cache:clear');
-                $message = 'Application cache cleared.';
-                break;
-            default:
-                Artisan::call('optimize:clear');
-                $message = 'All caches cleared.';
+            switch ($type) {
+                case 'config':
+                    Artisan::call('config:clear');
+                    $message = 'Configuration cache cleared successfully.';
+                    break;
+                case 'route':
+                    Artisan::call('route:clear');
+                    $message = 'Route cache cleared successfully.';
+                    break;
+                case 'view':
+                    Artisan::call('view:clear');
+                    $message = 'View cache cleared successfully.';
+                    break;
+                case 'application':
+                    Artisan::call('cache:clear');
+                    $message = 'Application cache cleared successfully.';
+                    break;
+                default:
+                    Artisan::call('optimize:clear');
+                    $message = 'All caches cleared successfully.';
+            }
+
+            // Return JSON response for AJAX requests
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message
+                ]);
+            }
+
+            return redirect()->back()->with('success', $message);
+        } catch (\Exception $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to clear cache: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', 'Failed to clear cache: ' . $e->getMessage());
         }
-
-        return redirect()->back()->with('success', $message);
     }
 
-    public function optimizeCache()
+    public function optimizeCache(Request $request)
     {
-        Artisan::call('optimize');
-        
-        return redirect()->back()->with('success', 'Application optimized successfully.');
+        try {
+            Artisan::call('optimize');
+            $message = 'Application optimized successfully. Configuration, routes, and views have been cached.';
+            
+            // Return JSON response for AJAX requests
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message
+                ]);
+            }
+            
+            return redirect()->back()->with('success', $message);
+        } catch (\Exception $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to optimize application: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', 'Failed to optimize application: ' . $e->getMessage());
+        }
     }
 
     private function updateEnvFile(array $data)
@@ -276,7 +315,7 @@ class SystemSettingsController extends Controller
         $paths = [
             storage_path('framework/cache'),
             storage_path('framework/views'),
-            bootstrap_path('cache'),
+            base_path('bootstrap/cache'),
         ];
 
         foreach ($paths as $path) {

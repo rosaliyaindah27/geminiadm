@@ -19,11 +19,11 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         
         // Disable CSRF for testing environment
-        if (app()->environment('testing')) {
-            $middleware->validateCsrfTokens(except: [
-                '*'
-            ]);
-        }
+        // if (app()->environment('testing')) {
+        //     $middleware->validateCsrfTokens(except: [
+        //         '*'
+        //     ]);
+        // }
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

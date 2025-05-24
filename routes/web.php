@@ -88,6 +88,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::post('/{user}/unsuspend', [UserManagementController::class, 'unsuspend'])->name('unsuspend');
         Route::post('/{user}/impersonate', [UserManagementController::class, 'impersonate'])->name('impersonate');
         Route::post('/{user}/notification', [UserManagementController::class, 'sendNotification'])->name('send-notification');
+        Route::post('/{user}/verify-email', [UserManagementController::class, 'verifyEmail'])->name('verify-email');
+        Route::post('/{user}/generate-api-key', [UserManagementController::class, 'generateApiKey'])->name('generate-api-key');
+        Route::post('/{user}/regenerate-api-key', [UserManagementController::class, 'regenerateApiKey'])->name('regenerate-api-key');
+        Route::post('/{user}/reset-password', [UserManagementController::class, 'resetPassword'])->name('reset-password');
     });
     
     // Stop impersonating (available globally)
