@@ -18,7 +18,7 @@ class SystemSetting extends Model
     ];
 
     protected $casts = [
-        'value' => 'json',
+        // Removed 'value' => 'json' to avoid conflict with custom accessor/mutator
     ];
 
     public static function get($key, $default = null)

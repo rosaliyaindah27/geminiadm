@@ -12,8 +12,8 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
     <!-- Scripts -->
-    @if(app()->environment('testing'))
-        <!-- Tailwind CSS CDN for testing -->
+    @if(app()->environment('testing') || !file_exists(public_path('build/manifest.json')))
+        <!-- Tailwind CSS CDN for development/testing -->
         <script src="https://cdn.tailwindcss.com"></script>
     @else
         @vite(['resources/css/app.css', 'resources/js/app.js'])
