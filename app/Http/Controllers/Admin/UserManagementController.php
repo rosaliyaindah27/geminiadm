@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\UserNotification;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserManagementController extends Controller
 {
@@ -86,17 +87,21 @@ class UserManagementController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|exists:roles,name',
+            'roles' => 'required|array|min:1',
+            'roles.*' => 'exists:roles,name',
+            'email_verified' => 'boolean',
+            'api_enabled' => 'boolean',
         ]);
 
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'email_verified_at' => now(),
+            'email_verified_at' => $request->has('email_verified') ? now() : null,
+            'api_enabled' => $request->has('api_enabled'),
         ]);
 
-        $user->assignRole($validated['role']);
+        $user->assignRole($validated['roles']);
 
         // Create notification for the new user
         UserNotification::createForUser(
@@ -278,5 +283,102 @@ class UserManagementController extends Controller
         return redirect()
             ->route('admin.users.show', $user)
             ->with('success', 'Notification sent successfully.');
+    }
+
+    public function verifyEmail(User $user)
+    {
+        if ($user->email_verified_at) {
+            return redirect()
+                ->route('admin.users.show', $user)
+                ->with('info', 'Email is already verified.');
+        }
+
+        $user->update(['email_verified_at' => now()]);
+
+        // Create notification
+        UserNotification::createForUser(
+            $user,
+            'account',
+            'Email Verified',
+            'Your email address has been verified by an administrator.',
+            ['verified_by_admin' => auth()->id()],
+            'medium'
+        );
+
+        return redirect()
+            ->route('admin.users.show', $user)
+            ->with('success', 'Email verified successfully.');
+    }
+
+    public function generateApiKey(User $user)
+    {
+        if ($user->api_key) {
+            return redirect()
+                ->route('admin.users.show', $user)
+                ->with('info', 'User already has an API key.');
+        }
+
+        $apiKey = 'gpt_' . Str::random(40);
+        $user->update([
+            'api_key' => $apiKey,
+            'api_enabled' => true
+        ]);
+
+        // Create notification
+        UserNotification::createForUser(
+            $user,
+            'api',
+            'API Key Generated',
+            'Your API key has been generated. You can now access the API endpoints.',
+            ['generated_by_admin' => auth()->id()],
+            'medium'
+        );
+
+        return redirect()
+            ->route('admin.users.show', $user)
+            ->with('success', 'API key generated successfully.');
+    }
+
+    public function regenerateApiKey(User $user)
+    {
+        $apiKey = 'gpt_' . Str::random(40);
+        $user->update(['api_key' => $apiKey]);
+
+        // Create notification
+        UserNotification::createForUser(
+            $user,
+            'api',
+            'API Key Regenerated',
+            'Your API key has been regenerated. Please update your applications with the new key.',
+            ['regenerated_by_admin' => auth()->id()],
+            'high'
+        );
+
+        return redirect()
+            ->route('admin.users.show', $user)
+            ->with('success', 'API key regenerated successfully.');
+    }
+
+    public function resetPassword(User $user)
+    {
+        $newPassword = Str::random(12);
+        $user->update(['password' => Hash::make($newPassword)]);
+
+        // Create notification
+        UserNotification::createForUser(
+            $user,
+            'security',
+            'Password Reset',
+            "Your password has been reset by an administrator. Your new temporary password is: {$newPassword}. Please change it after logging in.",
+            ['reset_by_admin' => auth()->id()],
+            'high'
+        );
+
+        // You could also send an email here
+        // Mail::to($user->email)->send(new PasswordResetMail($user, $newPassword));
+
+        return redirect()
+            ->route('admin.users.show', $user)
+            ->with('success', "Password reset successfully. New password: {$newPassword}");
     }
 }
