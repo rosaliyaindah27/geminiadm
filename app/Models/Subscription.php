@@ -56,6 +56,16 @@ class Subscription extends Model
     }
 
     /**
+     * Scope a query to only include active subscriptions.
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active')
+                    ->where('starts_at', '<=', now())
+                    ->where('ends_at', '>', now());
+    }
+
+    /**
      * Check if subscription is active.
      */
     public function isActive(): bool
